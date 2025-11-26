@@ -11,15 +11,16 @@ export default function RedirectIfLoggedIn({ children }: { children: React.React
 
   useEffect(() => {
     if (!isLoading && isLoggedIn && user) {
-      const path = `/${user.type}/${user._id}`; // Caminho dinâmico com base no tipo de usuário
+      // user_type vem do backend: "Aluno", "Professor", "Admin"
+      const path = `/${user.user_type}/${user._id}`;
       router.push(path);
     }
   }, [isLoggedIn, isLoading, user, router]);
 
   if (isLoading) return <Loading />;
 
-  // Se estiver logado, não renderiza o conteúdo do componente
+  // Se o usuário já está logado, não deve renderizar a página de login
   if (isLoggedIn && user) return null;
 
-  return <>{children}</>; // Caso não esteja logado, renderiza o conteúdo normalmente
+  return <>{children}</>;
 }

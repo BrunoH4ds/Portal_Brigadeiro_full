@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { findUserByEmail } = require('../models/userModel');
+const { findUserByEmail, findUserById } = require('../models/userModel');
 
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -68,6 +68,41 @@ const login = async (req, res) => {
   }
 };
 
+const me = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    const user = await findUserById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      authenticated: true,
+      user: {
+        _id: user._id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        user_type: user.user_type,
+        ra: user.ra,
+        curso: user.curso,
+        turma: user.turma,
+        rg: user.rg,
+        materia: user.materia,
+        created_at: user.created_at,
+      },
+    });
+  } catch (error) {
+    console.error("GET /auth/me error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const logout = (req, res) => {
   res.clearCookie('token');
   res.json({ message: 'Logged out successfully' });
@@ -76,4 +111,5 @@ const logout = (req, res) => {
 module.exports = {
   login,
   logout,
+  me,
 };

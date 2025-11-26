@@ -3,6 +3,7 @@ const { login, logout } = require('../controllers/authController');
 
 const router = express.Router();
 
+router.get("/me", authenticateToken, me);
 router.post('/login', login);
 router.post('/logout', logout);
 

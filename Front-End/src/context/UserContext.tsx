@@ -1,89 +1,95 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
+import { logoutUser, meUser } from "../../api/authCrud";
 
-// Tipos de dados do usuário
-interface User {
-  _id: number;
+export interface User {
+  _id: string;
   name: string;
+  username: string;
   email: string;
-  password: string;
-  type: string;
-  Ra: string;
-  admin: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  isActive: boolean;
-  isDeleted: boolean;
-  isLocked: boolean;
-  profilePicture: string;
+  role: string;
+  user_type: string;
+  ra?: string;
+  curso?: string;
+  turma?: string;
+  rg?: string;
+  materia?: string;
+  created_at: string;
 }
 
 interface UserContextType {
   user: User | null;
   isLoggedIn: boolean;
   isAdmin: boolean;
+  isLoading: boolean;
+  login: (data: User) => void;
+  logout: () => Promise<void>;
   setUser: (user: User | null) => void;
-  setIsLoggedIn: (isLoggedIn: boolean) => void;
-  setIsAdmin: (isAdmin: boolean) => void;
-  logout: () => void;
 }
 
-const UserContext = createContext<UserContextType & { isLoading: boolean } | undefined>(undefined);
+const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Carrega usuário automaticamente via cookie
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedIsLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-      const storedIsAdmin = localStorage.getItem("isAdmin") === "true";
-      const storedUser = localStorage.getItem("user");
-  
-      if (storedUser && storedIsLoggedIn) {
-        setUser(JSON.parse(storedUser));
-        setIsLoggedIn(storedIsLoggedIn);
-        setIsAdmin(storedIsAdmin);
-      }
-  
-      setIsLoading(false); // <- sinaliza que terminou de carregar
-    }
-  }, []);  
+    const fetchUser = async () => {
+      try {
+        const session = await meUser(); // <<< FALTAVA ISSO
 
-  // Atualizar localStorage quando o estado mudar
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (isLoggedIn && user) {
-        localStorage.setItem("user", JSON.stringify(user));
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("isAdmin", JSON.stringify(isAdmin));
-      } else {
-        localStorage.clear();
+        if (session?.authenticated && session.user) {
+          setUser(session.user);
+          setIsLoggedIn(true);
+          setIsAdmin(session.user.role === "admin");
+        }
+      } catch (e) {
+        // usuário não logado, ignora erro
+      } finally {
+        setIsLoading(false);
       }
-    }
-  }, [isLoggedIn, user, isAdmin]);
+    };
 
-  const logout = () => {
+    fetchUser();
+  }, []);
+
+  const login = (userData: User) => {
+    setUser(userData);
+    setIsLoggedIn(true);
+    setIsAdmin(userData.role === "admin");
+  };
+
+  const logout = async () => {
+    await logoutUser();
+
     setUser(null);
     setIsLoggedIn(false);
     setIsAdmin(false);
-    localStorage.clear();
   };
 
   return (
-    <UserContext.Provider value={{ user, isLoggedIn, isAdmin, setUser, setIsLoggedIn, setIsAdmin, logout, isLoading }}>
+    <UserContext.Provider
+      value={{ user, isLoggedIn, isAdmin, isLoading, login, logout, setUser }}
+    >
       {children}
     </UserContext.Provider>
   );
 };
 
 export const useUser = (): UserContextType => {
-  const context = useContext(UserContext);
-  if (!context) {
-    throw new Error("useUser must be used within a UserProvider");
+  const ctx = useContext(UserContext);
+  if (!ctx) {
+    throw new Error("useUser must be used inside <UserProvider>");
   }
-  return context;
+  return ctx;
 };

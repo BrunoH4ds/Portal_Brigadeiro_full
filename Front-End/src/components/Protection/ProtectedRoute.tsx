@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserContext";
@@ -8,7 +9,7 @@ import NotFoundError from "@/components/optional/NotFoundError";
 interface ProtectedRouteProps {
   children: React.ReactNode;
   expectedId: string;
-  expectedType: string;
+  expectedType: string; // "Aluno" | "Professor" | "Admin"
 }
 
 export default function ProtectedRoute({
@@ -19,6 +20,7 @@ export default function ProtectedRoute({
   const { isLoggedIn, isLoading, user } = useUser();
   const router = useRouter();
 
+  // Se não estiver logado, redireciona
   useEffect(() => {
     if (!isLoading && !isLoggedIn) {
       router.push("/Entrar");
@@ -26,12 +28,11 @@ export default function ProtectedRoute({
   }, [isLoading, isLoggedIn, router]);
 
   if (isLoading) return <Loading />;
+  if (!isLoggedIn || !user) return null;
 
-  if (!isLoggedIn) return null;
-
-  // Só chega aqui se já está logado
+  // 🔐 Verificação correta de autorização
   const isUserAuthorized =
-    user && user._id === parseInt(expectedId) && user.type === expectedType;
+    user._id === expectedId && user.user_type === expectedType;
 
   if (!isUserAuthorized) {
     return <NotFoundError accessDenied />;
