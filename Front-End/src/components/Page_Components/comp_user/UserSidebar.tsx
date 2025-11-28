@@ -11,11 +11,10 @@ interface User {
 interface UserSidebarProps {
   user: User;
   type: string;
-  handleLogout: () => void;
 }
 
-export default function UserSidebar({ user, type, handleLogout }: UserSidebarProps) {
-  const { isAdmin, isLoggedIn } = useUser();
+export default function UserSidebar({ user, type }: UserSidebarProps) {
+  const { isAdmin, isLoggedIn, logout } = useUser();
 
   return (
     <div className="w-full lg:w-1/4 lg:p-6 border-0 lg:border-r border-white/50 transition-all duration-300 ease-in-out">
@@ -37,7 +36,7 @@ export default function UserSidebar({ user, type, handleLogout }: UserSidebarPro
           </div>
 
           <h1 className="text-3xl font-bold text-gray-800 text-center mt-5">{user.name}</h1>
-          <p className="text-2xl font-bold text-blue-800 text-center mb-6">{type}</p>
+          <p className="text-2xl font-bold text-blue-800 text-center">{type}</p>
         </div>
 
         <div className="flex flex-col justify-end">
@@ -54,7 +53,7 @@ export default function UserSidebar({ user, type, handleLogout }: UserSidebarPro
           {isLoggedIn && (
             <button
               className="cursor-pointer bg-red-700 hover:bg-red-600 py-2 px-6 text-white rounded-md w-full mt-4"
-              onClick={handleLogout}
+              onClick={logout}
             >
               Sair
             </button>

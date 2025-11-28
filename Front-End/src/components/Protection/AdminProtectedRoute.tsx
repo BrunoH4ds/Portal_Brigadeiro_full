@@ -16,10 +16,13 @@ export default function AdminProtectedRoute({ children }: { children: React.Reac
     }
   }, [isLoading, isLoggedIn, router]);
 
-  if (isLoading) {
-    return <Loading />;
-  }
+  // Enquanto verifica login → carregando
+  if (isLoading) return <Loading />;
 
+  // Se não estiver logado, não renderiza nada (evita flicker)
+  if (!isLoggedIn) return null;
+
+  // Agora só chega aqui se estiver logado
   if (!isAdmin) {
     return <NotFoundError accessDenied />;
   }

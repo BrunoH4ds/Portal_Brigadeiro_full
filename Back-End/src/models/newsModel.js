@@ -1,52 +1,103 @@
 const pool = require('../config/db');
 
-const createNews = async (title, content, createdBy) => {
+// Criar notícia
+const createNews = async (title, content, author, image, category) => {
   const query = `
-    INSERT INTO news (title, content, created_by)
-    VALUES ($1, $2, $3)
-    RETURNING id, title, content, created_by, created_at
+    INSERT INTO news (title, content, author, image, category)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING _id, title, date, content, author, image, category
   `;
-  const values = [title, content, createdBy];
+  const values = [title, content, author, image, category];
   const result = await pool.query(query, values);
   return result.rows[0];
 };
 
+// Buscar todas as notícias
 const getAllNews = async () => {
-  const query = 'SELECT id, title, content, created_by, created_at FROM news ORDER BY created_at DESC';
+  const query = `
+    SELECT 
+      _id,
+      title,
+      date,
+      content,
+      author,
+      image,
+      category
+    FROM news
+    ORDER BY date DESC
+  `;
   const result = await pool.query(query);
   return result.rows;
 };
 
+// Buscar notícia por ID
 const getNewsById = async (id) => {
-  const query = 'SELECT * FROM news WHERE id = $1';
+  const query = `
+    SELECT 
+      _id,
+      title,
+      date,
+      content,
+      author,
+      image,
+      category
+    FROM news
+    WHERE _id = $1
+  `;
   const result = await pool.query(query, [id]);
   return result.rows[0];
 };
 
+// Atualizar notícia
 const updateNews = async (id, updates) => {
   const fields = [];
   const values = [];
-  let paramIndex = 1;
+  let index = 1;
 
   if (updates.title) {
-    fields.push(`title = $${paramIndex++}`);
+    fields.push(`title = $${index++}`);
     values.push(updates.title);
   }
+
   if (updates.content) {
-    fields.push(`content = $${paramIndex++}`);
+    fields.push(`content = $${index++}`);
     values.push(updates.content);
+  }
+
+  if (updates.author) {
+    fields.push(`author = $${index++}`);
+    values.push(updates.author);
+  }
+
+  if (updates.image) {
+    fields.push(`image = $${index++}`);
+    values.push(updates.image);
+  }
+
+  if (updates.category) {
+    fields.push(`category = $${index++}`);
+    values.push(updates.category);
   }
 
   if (fields.length === 0) return null;
 
-  const query = `UPDATE news SET ${fields.join(', ')} WHERE id = $${paramIndex} RETURNING id, title, content, created_by, created_at`;
+  const query = `
+    UPDATE news
+    SET ${fields.join(', ')}
+    WHERE _id = $${index}
+    RETURNING _id, title, date, content, author, image, category
+  `;
+
   values.push(id);
+
   const result = await pool.query(query, values);
+
   return result.rows[0];
 };
 
+// Deletar notícia
 const deleteNews = async (id) => {
-  const query = 'DELETE FROM news WHERE id = $1 RETURNING id';
+  const query = `DELETE FROM news WHERE _id = $1 RETURNING _id`;
   const result = await pool.query(query, [id]);
   return result.rows[0];
 };

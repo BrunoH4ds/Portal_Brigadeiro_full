@@ -2,7 +2,6 @@ import { axiosInstance } from "./Config";
 import { UserType } from "@/types/user";
 
 export async function getAllUsers(): Promise<UserType[] | null> {
-  console.log("Calling getAllUsers API");
   try {
     const res = await axiosInstance.get("/users");
     console.log("getAllUsers response received");
@@ -13,8 +12,18 @@ export async function getAllUsers(): Promise<UserType[] | null> {
   }
 }
 
+export async function getLastUsers() {
+  try {
+    const res = await axiosInstance.get("/users/last");
+    return res.data;
+  } catch (error) {
+    console.error("Erro ao buscar últimos usuários:", error);
+    return [];
+  }
+}
+
+
 export async function getUserById(id: string): Promise<UserType | null> {
-  console.log("Calling getUserById API with id:", id);
   try {
     const res = await axiosInstance.get(`/users/${id}`);
     console.log("getUserById response received for id:", id);

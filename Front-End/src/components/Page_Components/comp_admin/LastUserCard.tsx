@@ -1,21 +1,31 @@
-import { UsersArrayAluno } from "@/database/UsersArrayAluno";
-import { UsersArrayProfessor } from "@/database/UsersArrayProfessor";
-import SingleLastUserCard from "./SingleLastUserCard"; // ajuste o caminho se necessário
+"use client";
+
+import { useEffect, useState } from "react";
+import { getLastUsers } from "../../../../api/usersCrud";
+import SingleLastUserCard from "./SingleLastUserCard";
+
+interface User {
+  _id: string;
+  name: string;
+  user_type: string;
+  created_at: string;
+}
 
 export default function LastUsersCard() {
-  const lastProfessors = [...UsersArrayProfessor]
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )
-    .slice(0, 4);
+  const [professors, setProfessors] = useState<User[]>([]);
+  const [students, setStudents] = useState<User[]>([]);
+  
+  useEffect(() => {
+    async function loadUsers() {
+      const list = await getLastUsers();
+      if (!list) return;
 
-  const lastStudents = [...UsersArrayAluno]
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )
-    .slice(0, 4);
+      setProfessors(list.filter(u => u.user_type === "Professor").slice(0, 4));
+      setStudents(list.filter(u => u.user_type === "Aluno").slice(0, 4));
+    }
+
+    loadUsers();
+  }, []);
 
   return (
     <div className="bg-gray-100/50 p-6 mt-8 rounded-lg shadow-md">
@@ -29,7 +39,7 @@ export default function LastUsersCard() {
         <div className="flex-1">
           <h4 className="font-semibold text-gray-800 text-lg">Professores</h4>
           <div className="space-y-2 mt-2">
-            {lastProfessors.map((user) => (
+            {professors.map((user) => (
               <SingleLastUserCard key={user._id} user={user} />
             ))}
           </div>
@@ -39,7 +49,7 @@ export default function LastUsersCard() {
         <div className="flex-1">
           <h4 className="font-semibold text-gray-800 text-lg">Alunos</h4>
           <div className="space-y-2 mt-2">
-            {lastStudents.map((user) => (
+            {students.map((user) => (
               <SingleLastUserCard key={user._id} user={user} />
             ))}
           </div>

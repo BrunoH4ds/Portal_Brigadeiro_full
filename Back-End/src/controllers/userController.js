@@ -5,6 +5,7 @@ const {
   findUserById,
   updateUser,
   deleteUser,
+  getLastUsers,
 } = require('../models/userModel');
 
 const saltRounds = 10;
@@ -67,6 +68,19 @@ const createUserController = async (req, res) => {
     res.status(201).json(newUser);
   } catch (error) {
     console.error('Create user error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// ===============================
+// GET LAST USER
+// ===============================
+const getLastUsersController = async (req, res) => {
+  try {
+    const users = await getLastUsers();
+    res.json(users);
+  } catch (error) {
+    console.error('Get last users error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -160,4 +174,5 @@ module.exports = {
   getUserByIdController,
   updateUserController,
   deleteUserController,
+  getLastUsersController,
 };

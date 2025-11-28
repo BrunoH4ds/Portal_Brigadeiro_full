@@ -38,7 +38,6 @@ export default function InputsLogin() {
   return (
     <div className="flex flex-col justify-center items-center w-full gap-2 mb-3">
 
-      {error && <p className="text-red-500">{error}</p>}
 
       <h6>E-mail</h6>
       <input
@@ -47,7 +46,7 @@ export default function InputsLogin() {
         value={email}
         onChange={(e) => setEmail(e.target.value.toLowerCase())}
         type="email"
-      />
+        />
 
       <h6>Senha</h6>
       <input
@@ -56,12 +55,12 @@ export default function InputsLogin() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         type="password"
-      />
-
+        />
+      {error && <p className="text-red-600">{error}</p>}
       <button
         className="mt-2 w-4/5 p-2 rounded-md bg-blue-900 hover:bg-blue-800 text-white cursor-pointer"
         onClick={handleLogin}
-      >
+        >
         Entrar
       </button>
     </div>

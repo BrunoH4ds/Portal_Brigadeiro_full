@@ -4,11 +4,10 @@ const { findUserByEmail, findUserById } = require('../models/userModel');
 
 const login = async (req, res) => {
   const { email, password } = req.body;
-
+  
   if (!email || !password) {
     return res.status(400).json({ message: 'Email and password are required' });
   }
-
   try {
     const user = await findUserByEmail(email);
 
@@ -64,6 +63,7 @@ const login = async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
+    console.log(email,password)
     res.status(500).json({ message: 'Internal server error' });
   }
 };

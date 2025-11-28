@@ -91,6 +91,18 @@ const getAllUsers = async () => {
   return result.rows;
 };
 
+const getLastUsers = async () => {
+  const query = `
+    SELECT 
+      _id, name, email, user_type, created_at
+    FROM users
+    ORDER BY created_at DESC
+    LIMIT 8
+  `;
+  const result = await pool.query(query);
+  return result.rows;
+};
+
 // Atualizar usuário
 const updateUser = async (id, updates) => {
   const fields = [];
@@ -137,4 +149,5 @@ module.exports = {
   getAllUsers,
   updateUser,
   deleteUser,
+  getLastUsers,
 };
